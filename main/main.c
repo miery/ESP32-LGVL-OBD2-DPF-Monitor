@@ -71,8 +71,8 @@ static const char* init_cmds[] = {
     "ATSP6",    // Force CAN protocol (500k)
     "ATSH7E0",  // Set header
 //    "ATCRA7E8", // Receive filter
-    "ATCAF1",   // Enable formatting
-    "1001"      // Standard session
+//    "ATCAF1",   // Enable formatting
+//    "1001"      // Standard session
 };
 
 static int init_step = 0;
@@ -289,23 +289,23 @@ static int gap_cb(struct ble_gap_event *event, void *arg) {
             unsigned int a, b;
             char *p;
 
-            if ((p = strstr(rx, "623277")) && sscanf(p + 6, "%x %x", &a, &b) == 2) {
+            if ((p = strstr(rx, "62 32 77")) && sscanf(p + 6, "%x", &a) == 1) {
                 val_dist = (a * 256 + b);
                 data_ready = true;
             }
-            else if ((p = strstr(rx, "623275")) && sscanf(p + 6, "%x %x", &a, &b) == 2) {
+            else if ((p = strstr(rx, "62 32 75")) && sscanf(p + 6, "%x", &a) == 1) {
                 val_soot = (a * 256 + b) / 10.0;
                 data_ready = true;
             }
-            else if ((p = strstr(rx, "620005")) && sscanf(p + 6, "%x %x", &a, &b) == 2) {
+            else if ((p = strstr(rx, "62 00 05")) && sscanf(p + 6, "%x", &a) == 1) {
                 val_temp = (a * 256 + b) - 40;
                 data_ready = true;
             }
-            else if ((p = strstr(rx, "62007A")) && sscanf(p + 6, "%x %x", &a, &b) == 2) {
+            else if ((p = strstr(rx, "62 00 7A")) && sscanf(p + 6, "%x %x", &a, &b) == 2) {
                 val_diff = (a * 256 + b);
                 data_ready = true;
 			}
-			else if ((p = strstr(rx, "623274")) && sscanf(p + 6, "%x", &a) == 1) {
+			else if ((p = strstr(rx, "62 32 74")) && sscanf(p + 6, "%x", &a) == 1) {
 				val_regen = a;
 				data_ready = true;
             }
@@ -475,7 +475,7 @@ void app_main(void) {
     // Metric boxes (translated labels)
     create_metric_box(main_cont, "SOOT", "%", 0, 0, &lbl_val_soot);
     create_metric_box(main_cont, "DISTANCE", "km", 1, 0, &lbl_val_dist);
-    create_metric_box(main_cont, "ECT", "°C", 0, 1, &lbl_val_temp);
+    create_metric_box(main_cont, "TEMP", "°C", 0, 1, &lbl_val_temp);
     create_metric_box(main_cont, "DELTA P", "hPa", 1, 1, &lbl_val_diff);
 
     uint32_t last_obd_ms = 0;
@@ -492,7 +492,7 @@ void app_main(void) {
 
                 init_step++;
 
-                if (init_step >= 7) {
+                if (init_step >= 4) {
                     state = STATE_READY;
                     lv_label_set_text(lbl_status, "Astra J: Connected");
                 }
