@@ -166,7 +166,7 @@ static void create_metric_box(
     // Unit label
     lv_obj_t * l_unit = lv_label_create(obj);
     lv_label_set_text(l_unit, unit);
-    lv_obj_set_style_text_font(l_unit, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_font(l_unit, &lv_font_montserrat_16, 0);
     lv_obj_set_style_text_color(l_unit, lv_color_white(), 0);
     lv_obj_align(l_unit, LV_ALIGN_BOTTOM_MID, 0, 5);
 }
@@ -475,7 +475,7 @@ void app_main(void) {
     // Metric boxes (translated labels)
     create_metric_box(main_cont, "SOOT", "%", 0, 0, &lbl_val_soot);
     create_metric_box(main_cont, "DISTANCE", "km", 1, 0, &lbl_val_dist);
-    create_metric_box(main_cont, "TEMP", "°C", 0, 1, &lbl_val_temp);
+    create_metric_box(main_cont, "ECT", "°C", 0, 1, &lbl_val_temp);
     create_metric_box(main_cont, "DELTA P", "hPa", 1, 1, &lbl_val_diff);
 
     uint32_t last_obd_ms = 0;
