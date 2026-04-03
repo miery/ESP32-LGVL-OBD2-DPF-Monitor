@@ -57,8 +57,7 @@ static uint16_t conn_handle;
 static uint16_t obd_char_handle = 0;
 
 // Parsed values
-static float val_soot = 0.0; 
-static int val_diff = 0, val_temp = 0, val_dist = 0;
+static int val_diff = 0, val_temp = 0, val_dist = 0, val_soot = 0; 
 static int val_regen = 0; // 0 = no regen, >0 = % progress
 
 static bool data_ready = false;
@@ -293,7 +292,7 @@ static int gap_cb(struct ble_gap_event *event, void *arg) {
                 data_ready = true;
             }
 			else if ((p = strstr(rx, "62 32 75")) && sscanf(p + 9, "%x", &a) == 1) {
-				val_soot = (float)a;
+				val_soot = (int)a;
                 data_ready = true;
             }
 			else if ((p = strstr(rx, "62 00 05")) && sscanf(p + 9, "%x", &a) == 1) {
@@ -511,7 +510,7 @@ void app_main(void) {
             }
 
             if (data_ready) {
-                lv_label_set_text_fmt(lbl_val_soot, "%.1f", val_soot);
+				lv_label_set_text_fmt(lbl_val_soot, "%d", val_soot);
                 lv_label_set_text_fmt(lbl_val_temp, "%d", val_temp);
                 lv_label_set_text_fmt(lbl_val_diff, "%d", val_diff);
                 lv_label_set_text_fmt(lbl_val_dist, "%d", val_dist);
