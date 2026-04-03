@@ -142,52 +142,51 @@ static void create_metric_box(
         LV_GRID_ALIGN_STRETCH, col, 1,
         LV_GRID_ALIGN_STRETCH, row, 1);
 
-    // Box style
+    // Box style - całkowicie czarny, bez ramek zmieniających optykę
     lv_obj_set_style_bg_color(obj, lv_color_black(), 0);
-    lv_obj_set_style_border_color(obj, lv_color_black(), 0);
-    lv_obj_set_style_border_width(obj, 2, 0);
-    lv_obj_set_style_radius(obj, 20, 0);
+    lv_obj_set_style_border_width(obj, 0, 0); 
     lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
 
-    // Title label
+    // Title label - statyczna pozycja
     lv_obj_t * l_title = lv_label_create(obj);
     lv_label_set_text(l_title, title);
     lv_obj_set_style_text_font(l_title, &lv_font_montserrat_22, 0);
     lv_obj_set_style_text_color(l_title, lv_color_white(), 0);
     lv_obj_align(l_title, LV_ALIGN_TOP_MID, 0, 0);
 
-    // Value label
+    // Value label - KLUCZ DO BRAKU SKAKANIA
     *val_label = lv_label_create(obj);
-    lv_label_set_text(*val_label, "0.0");
+    lv_label_set_text(*val_label, "---"); // Domyślny tekst
     lv_obj_set_style_text_font(*val_label, &lv_font_montserrat_48, 0);
     lv_obj_set_style_text_color(*val_label, lv_color_white(), 0);
-    lv_obj_align(*val_label, LV_ALIGN_CENTER, 0, 10);
+    
+    // Ustawiamy stałą szerokość etykiety i centrowanie tekstu
+    lv_obj_set_width(*val_label, 150); 
+    lv_obj_set_style_text_align(*val_label, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_align(*val_label, LV_ALIGN_CENTER, 0, 5);
 
     // Unit label
     lv_obj_t * l_unit = lv_label_create(obj);
     lv_label_set_text(l_unit, unit);
     lv_obj_set_style_text_font(l_unit, &lv_font_montserrat_16, 0);
     lv_obj_set_style_text_color(l_unit, lv_color_white(), 0);
-    lv_obj_align(l_unit, LV_ALIGN_BOTTOM_MID, 0, 5);
+    lv_obj_align(l_unit, LV_ALIGN_BOTTOM_MID, 0, 0);
 }
 
 // =====================================================
 // UPDATE REGENERATION STATUS
 // =====================================================
-void set_regeneration_active(bool active) {
-    if (active) {
-        lv_obj_set_style_bg_color(lbl_status, lv_palette_main(LV_PALETTE_RED), 0);
-
-        char buf[64];
-        snprintf(buf, sizeof(buf), "DPF REGEN ACTIVE (%d%%)", val_regen);
-        lv_label_set_text(lbl_status, buf);
-
+void set_regeneration_active(int status) {
+    if (status > 0) {
+        // Niebieski kolor dla aktywnego wypalania
+        lv_obj_set_style_text_color(lbl_status, lv_color_hex(0x0000FF), 0);
+        lv_label_set_text(lbl_status, "REGEN ACTIVE!"); 
     } else {
-        lv_obj_set_style_bg_color(lbl_status, lv_color_black(), 0);
-        lv_label_set_text(lbl_status, "Astra J: Connected");
+        // Biały standardowy napis
+        lv_obj_set_style_text_color(lbl_status, lv_color_white(), 0);
+        lv_label_set_text(lbl_status, "ASTRA J: CONNECTED");
     }
 }
-
 // =====================================================
 // BLE COMMUNICATION
 // =====================================================
@@ -286,27 +285,28 @@ static int gap_cb(struct ble_gap_event *event, void *arg) {
 
             ESP_LOGI(TAG, "RX: %s", rx);
 
-            unsigned int a, b;
+            unsigned int a, b, c;
             char *p;
 
-            if ((p = strstr(rx, "62 32 77")) && sscanf(p + 6, "%x", &a) == 1) {
-                val_dist = (a * 256 + b);
+			if ((p = strstr(rx, "62 32 77")) && sscanf(p + 9, "%x %x %x", &a, &b, &c) == 3) {
+                val_dist = (a << 16) | (b << 8) | c;
                 data_ready = true;
             }
-            else if ((p = strstr(rx, "62 32 75")) && sscanf(p + 6, "%x", &a) == 1) {
-                val_soot = (a * 256 + b) / 10.0;
+			else if ((p = strstr(rx, "62 32 75")) && sscanf(p + 9, "%x", &a) == 1) {
+				val_soot = (float)a;
                 data_ready = true;
             }
-            else if ((p = strstr(rx, "62 00 05")) && sscanf(p + 6, "%x", &a) == 1) {
-                val_temp = (a * 256 + b) - 40;
+			else if ((p = strstr(rx, "62 00 05")) && sscanf(p + 9, "%x", &a) == 1) {
+                val_temp = a - 40;
                 data_ready = true;
             }
-            else if ((p = strstr(rx, "62 00 7A")) && sscanf(p + 6, "%x %x", &a, &b) == 2) {
-                val_diff = (a * 256 + b);
-                data_ready = true;
+			else if ((p = strstr(rx, "62 00 7A")) && sscanf(p + 9, "%x %x %x", &a, &b, &c) == 3) {
+				float raw_val = (float)((a << 16) | (b << 8) | c);
+				val_diff = (int)((raw_val - 65535.0f) / 10.0f); 
+				data_ready = true;
 			}
-			else if ((p = strstr(rx, "62 32 74")) && sscanf(p + 6, "%x", &a) == 1) {
-				val_regen = a;
+			else if ((p = strstr(rx, "62 32 74")) && sscanf(p + 9, "%x", &a) == 1) {
+				val_regen = a; 
 				data_ready = true;
             }
             break;
