@@ -70,7 +70,7 @@ static const char* init_cmds[] = {
     "ATSP6",    // Force CAN protocol (500k)
     "ATSH7E0",  // Set header
 //    "ATCRA7E8", // Receive filter
-//    "ATCAF1",   // Enable formatting
+    "ATCAF1",   // Enable formatting
 //    "1001"      // Standard session
 };
 
@@ -80,7 +80,7 @@ static int init_step = 0;
 static const char* obd_queries[] = {
     "223275", // Soot %
     "220005", // Coolant temperature
-    "22007A", // Differential pressure
+    "223035", // Differential pressure
     "223277",  // Distance between regenerations
 	"223274" // Regeneration status
 };
@@ -177,12 +177,10 @@ static void create_metric_box(
 // =====================================================
 void set_regeneration_active(int status) {
     if (status > 0) {
-        // Niebieski kolor dla aktywnego wypalania
-        lv_obj_set_style_text_color(lbl_status, lv_color_hex(0x0000FF), 0);
+        lv_obj_set_style_text_color(lbl_status, lv_color_hex(0x00FF00), 0);
         lv_label_set_text(lbl_status, "REGEN ACTIVE!"); 
     } else {
-        // Biały standardowy napis
-        lv_obj_set_style_text_color(lbl_status, lv_color_white(), 0);
+        lv_obj_set_style_text_color(lbl_status, lv_color_hex(0x0000FF), 0);
         lv_label_set_text(lbl_status, "ASTRA J: CONNECTED");
     }
 }
@@ -299,9 +297,14 @@ static int gap_cb(struct ble_gap_event *event, void *arg) {
                 val_temp = a - 40;
                 data_ready = true;
             }
-			else if ((p = strstr(rx, "62 00 7A")) && sscanf(p + 9, "%x %x %x", &a, &b, &c) == 3) {
-				float raw_val = (float)((a << 16) | (b << 8) | c);
-				val_diff = (int)((raw_val - 65535.0f) / 10.0f); 
+			else if ((p = strstr(rx, "62 30 35")) && sscanf(p + 9, "%x", &a) == 1) {
+				int raw_val = (int)a; 
+				if (raw_val <= 21) {
+					val_diff = 0;
+				} else {
+					val_diff = (raw_val - 21) * 10;
+				}
+
 				data_ready = true;
 			}
 			else if ((p = strstr(rx, "62 32 74")) && sscanf(p + 9, "%x", &a) == 1) {
@@ -310,14 +313,22 @@ static int gap_cb(struct ble_gap_event *event, void *arg) {
             }
             break;
         }
-
         case BLE_GAP_EVENT_DISCONNECT:
-            ESP_LOGW(TAG, "Disconnected! Restarting scan...");
-            state = STATE_DISCONNECTED;
+            ESP_LOGI(TAG, "Disconnected! Reason: %d", event->disconnect.reason);
+            
+            state = STATE_INIT_OBD;
+            init_step = 0;
+            query_idx = 0;
+            conn_handle = 0;
+
+            if (lbl_status) {
+                lv_label_set_text(lbl_status, "SEARCHING OBD...");
+                lv_obj_set_style_text_color(lbl_status, lv_color_white(), 0);
+                lv_obj_align(lbl_status, LV_ALIGN_TOP_MID, 0, 10);
+            }
             start_scan();
             break;
     }
-
     return 0;
 }
 
@@ -441,6 +452,9 @@ void app_main(void) {
     lv_obj_set_style_text_font(lbl_status, &lv_font_montserrat_22, 0);
 
     lv_obj_set_style_bg_opa(lbl_status, LV_OPA_COVER, 0);
+	lv_obj_set_width(lbl_status, LV_PCT(100));
+	lv_obj_set_style_text_align(lbl_status, LV_TEXT_ALIGN_CENTER, 0);
+	lv_label_set_long_mode(lbl_status, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_set_style_bg_color(lbl_status, lv_color_black(), 0);
     lv_obj_set_style_pad_all(lbl_status, 8, 0);
 
@@ -474,7 +488,7 @@ void app_main(void) {
     // Metric boxes (translated labels)
     create_metric_box(main_cont, "SOOT", "%", 0, 0, &lbl_val_soot);
     create_metric_box(main_cont, "DISTANCE", "km", 1, 0, &lbl_val_dist);
-    create_metric_box(main_cont, "TEMP", "°C", 0, 1, &lbl_val_temp);
+    create_metric_box(main_cont, "ECT", "°C", 0, 1, &lbl_val_temp);
     create_metric_box(main_cont, "DELTA P", "hPa", 1, 1, &lbl_val_diff);
 
     uint32_t last_obd_ms = 0;
@@ -485,25 +499,25 @@ void app_main(void) {
         uint32_t now = esp_timer_get_time() / 1000;
 
         // OBD initialization sequence
-        if (state == STATE_INIT_OBD) {
-            if (now - last_obd_ms > 1500) {
-                ble_write_obd(init_cmds[init_step]);
+	if (state == STATE_INIT_OBD) {
+		if (now - last_obd_ms > 1500) {
+			ble_write_obd(init_cmds[init_step]);
+			init_step++;
 
-                init_step++;
-
-                if (init_step >= 4) {
-                    state = STATE_READY;
-                    lv_label_set_text(lbl_status, "Astra J: Connected");
-                }
-
-                last_obd_ms = now;
-            }
-        }
+			// Zmieniamy stan TYLKO RAZ, gdy dojdziemy do końca listy komend
+			if (init_step >= sizeof(init_cmds) / sizeof(init_cmds[0])) {
+				state = STATE_READY;
+				lv_label_set_text(lbl_status, "ASTRA J: CONNECTED");
+				lv_obj_set_style_text_color(lbl_status, lv_color_hex(0x0000FF), 0);
+			}
+			last_obd_ms = now;
+		}
+	}
 
         // Normal operation
         else if (state == STATE_READY) {
 
-            if (now - last_obd_ms > 1500) {
+            if (now - last_obd_ms > 800) {
                 ble_write_obd(obd_queries[query_idx]);
                 query_idx = (query_idx + 1) % 5;
                 last_obd_ms = now;
