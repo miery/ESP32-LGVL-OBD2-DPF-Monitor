@@ -59,7 +59,7 @@ This project is optimized for a **circular AMOLED display** with LVGL UI.
 |--------|----------------------------------|
 | 223275 | DPF soot level (%)              |
 | 220005 | Coolant temperature             |
-| 22007A | Differential pressure           |
+| 223035 | Differential pressure           |
 | 223277 | Distance since last regeneration|
 | 223274 | Regeneration status (%)         |
 
