@@ -141,30 +141,25 @@ static void create_metric_box(
         LV_GRID_ALIGN_STRETCH, col, 1,
         LV_GRID_ALIGN_STRETCH, row, 1);
 
-    // Box style - całkowicie czarny, bez ramek zmieniających optykę
     lv_obj_set_style_bg_color(obj, lv_color_black(), 0);
     lv_obj_set_style_border_width(obj, 0, 0); 
     lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
 
-    // Title label - statyczna pozycja
     lv_obj_t * l_title = lv_label_create(obj);
     lv_label_set_text(l_title, title);
     lv_obj_set_style_text_font(l_title, &lv_font_montserrat_22, 0);
     lv_obj_set_style_text_color(l_title, lv_color_white(), 0);
     lv_obj_align(l_title, LV_ALIGN_TOP_MID, 0, 0);
 
-    // Value label - KLUCZ DO BRAKU SKAKANIA
     *val_label = lv_label_create(obj);
     lv_label_set_text(*val_label, "---"); // Domyślny tekst
     lv_obj_set_style_text_font(*val_label, &lv_font_montserrat_48, 0);
     lv_obj_set_style_text_color(*val_label, lv_color_white(), 0);
     
-    // Ustawiamy stałą szerokość etykiety i centrowanie tekstu
     lv_obj_set_width(*val_label, 150); 
     lv_obj_set_style_text_align(*val_label, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_align(*val_label, LV_ALIGN_CENTER, 0, 5);
 
-    // Unit label
     lv_obj_t * l_unit = lv_label_create(obj);
     lv_label_set_text(l_unit, unit);
     lv_obj_set_style_text_font(l_unit, &lv_font_montserrat_16, 0);
@@ -299,10 +294,10 @@ static int gap_cb(struct ble_gap_event *event, void *arg) {
             }
 			else if ((p = strstr(rx, "62 30 35")) && sscanf(p + 9, "%x", &a) == 1) {
 				int raw_val = (int)a; 
-				if (raw_val <= 21) {
+				if (raw_val <= 20) {
 					val_diff = 0;
 				} else {
-					val_diff = (raw_val - 21) * 10;
+					val_diff = raw_val - 20;
 				}
 
 				data_ready = true;
@@ -489,7 +484,7 @@ void app_main(void) {
     create_metric_box(main_cont, "SOOT", "%", 0, 0, &lbl_val_soot);
     create_metric_box(main_cont, "DISTANCE", "km", 1, 0, &lbl_val_dist);
     create_metric_box(main_cont, "ECT", "°C", 0, 1, &lbl_val_temp);
-    create_metric_box(main_cont, "DELTA P", "hPa", 1, 1, &lbl_val_diff);
+    create_metric_box(main_cont, "DELTA P", "kPa", 1, 1, &lbl_val_diff);
 
     uint32_t last_obd_ms = 0;
 
@@ -504,7 +499,6 @@ void app_main(void) {
 			ble_write_obd(init_cmds[init_step]);
 			init_step++;
 
-			// Zmieniamy stan TYLKO RAZ, gdy dojdziemy do końca listy komend
 			if (init_step >= sizeof(init_cmds) / sizeof(init_cmds[0])) {
 				state = STATE_READY;
 				lv_label_set_text(lbl_status, "ASTRA J: CONNECTED");
