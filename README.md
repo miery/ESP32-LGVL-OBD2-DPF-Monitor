@@ -101,12 +101,6 @@ This project is optimized for a **circular AMOLED display** with LVGL UI.
 <img src="https://github.com/miery/ESP32-LGVL-OBD2-DPF-Monitor/blob/main/img/view.jpg" style="height:100%;"></img>
 ---
 
-## 📄 License
-
-MIT (or your preferred license)
-
----
-
 ## 🤝 Contributions
 
 Feel free to fork, test on other vehicles, and submit improvements!
