@@ -136,17 +136,6 @@ Designed for **Opel Astra J (A17DTJ)** using BLE communication with ELM327-compa
 
 <img src="https://github.com/miery/ESP32-LGVL-OBD2-DPF-Monitor/blob/main/img/view.jpg"/> <img src="https://github.com/miery/ESP32-LGVL-OBD2-DPF-Monitor/blob/main/img/view2.jpg"/> 
 
-
----
-
-## 🚀 Future Improvements
-
-- 🔄 OBD parser as separate module
-- 📊 Data logging (DPF history)
-- ⚠️ Smart alerts (regen warnings)
-- 🎨 UI themes / skins
-- 🔍 Auto PID detection
-
 ---
 
 ## 🤝 Contributions
