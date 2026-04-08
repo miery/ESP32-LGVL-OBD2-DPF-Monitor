@@ -1,4 +1,4 @@
-# 🚗 ESP32 OBD2 DPF Monitor (Astra J)
+# 🚗 ESP32 OBD2 DPF Monitor (Opel Astra J)
 
 Real-time **DPF monitoring system** built on ESP32 with a round AMOLED display.  
 Designed specifically for **Opel Astra J (A17DTJ)**, using BLE communication with ELM327-compatible adapters (e.g. vLinker MC).
@@ -99,12 +99,6 @@ This project is optimized for a **circular AMOLED display** with LVGL UI.
 ## 📸 Preview
 
 <img src="https://github.com/miery/ESP32-LGVL-OBD2-DPF-Monitor/blob/main/img/view.jpg" style="height:100%;"></img>
----
-
-## 📄 License
-
-MIT (or your preferred license)
-
 ---
 
 ## 🤝 Contributions
