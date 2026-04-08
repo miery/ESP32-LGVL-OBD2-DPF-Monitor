@@ -76,7 +76,6 @@ Designed for **Opel Astra J (A17DTJ)** using BLE communication with ELM327-compa
 
 ## 🏗️ Project Structure (Modular Architecture)
 
-> Refactored from single `main.c` → **modular design (no logic changes)**
 main.c / main.h
 │
 ├── display.c / display.h → LCD + LVGL initialization
@@ -84,8 +83,6 @@ main.c / main.h
 ├── ble_obd.c / ble_obd.h → BLE communication + OBD RX parser
 ├── obd_logic.c / obd_logic.h → state machine + query scheduler
 └── led.c / led.h → LED control (WS2812)
-> 
----
 
 ## 🧩 Module Responsibilities
 
@@ -131,22 +128,6 @@ main.c / main.h
 - Visual feedback:
   - Idle
   - Regeneration active
-
----
-
-## ⚠️ Important Notes
-
-- ❗ **No logic changes during refactor**
-  - Only code organization
-  - Same behavior as original version
-
-- ⚠️ Vehicle-specific implementation:
-  - Opel Astra J (A17DTJ)
-  - OEM Mode 22 PIDs
-
-- BLE adapter must:
-  - support notifications
-  - support write commands
 
 ---
 
