@@ -134,7 +134,8 @@ Designed for **Opel Astra J (A17DTJ)** using BLE communication with ELM327-compa
 
 ## 📸 Preview
 
-<img src="https://github.com/miery/ESP32-LGVL-OBD2-DPF-Monitor/blob/main/img/view.jpg"/>
+<img src="https://github.com/miery/ESP32-LGVL-OBD2-DPF-Monitor/blob/main/img/view.jpg"/> <img src="https://github.com/miery/ESP32-LGVL-OBD2-DPF-Monitor/blob/main/img/view2.jpg"/> 
+
 
 ---
 
