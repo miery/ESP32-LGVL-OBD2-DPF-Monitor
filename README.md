@@ -133,8 +133,8 @@ Designed for **Opel Astra J (A17DTJ)** using BLE communication with ELM327-compa
 ---
 
 ## 📸 Preview
+<img src="https://github.com/miery/SMARTRING_DPF/blob/main/img/pub/1.jpg" alt="SmartRing DPF Monitor" width="300" height="300"><img src="https://github.com/miery/SMARTRING_DPF/blob/main/img/pub/1.jpg" alt="SmartRing DPF Monitor" width="300" height="300"><img src="https://github.com/miery/SMARTRING_DPF/blob/main/img/pub/1.jpg" alt="SmartRing DPF Monitor" width="300" height="300">
 
-<img src="https://github.com/miery/ESP32-LGVL-OBD2-DPF-Monitor/blob/main/img/view.jpg"/> <img src="https://github.com/miery/ESP32-LGVL-OBD2-DPF-Monitor/blob/main/img/view2.jpg"/> 
 
 ---
 
